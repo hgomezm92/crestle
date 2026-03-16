@@ -12,7 +12,7 @@ env/
 # Base de datos — se genera con seed.py, no se versiona*
 # * Excepción: cuando vayas a desplegar en Render la primera vez,
 #   comenta esta línea temporalmente, sube la BD, y vuelve a activarla.
-backend/emblema.db
+backend/crestle.db
 
 # Escudos — igual, generados por seed.py
 # Misma excepción que la BD para el primer despliegue.
