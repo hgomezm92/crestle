@@ -489,7 +489,9 @@ function renderAttemptLabel() {
 function showResult(won) {
   $('inputArea').style.display = 'none';
   $('guessBtn').disabled = true;
-  $('skipBtn').disabled  = true;
+  // Null check in case the element isn't in the DOM yet
+  const skipBtn = $('skipBtn');
+  if (skipBtn) skipBtn.disabled = true;
 
   const attemptsTaken = state.wrongCount + (won ? 1 : 0);
   const metaText = won
