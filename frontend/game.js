@@ -253,6 +253,9 @@ function startRound() {
   $('guessInput').value        = '';
   $('guessBtn').disabled       = false;
   $('autocompleteList').classList.remove('open');
+  // Re-enable skip button for the new round
+  const skipBtn = $('skipBtn');
+  if (skipBtn) skipBtn.disabled = false;
 
   renderPips();
   renderAttemptLabel();
@@ -561,6 +564,8 @@ guessInput.addEventListener('keydown', e => {
       break;
 
     case 'Enter':
+      // If input is empty, do nothing — prevents submitting a stale value
+      if (!guessInput.value.trim()) break;
       if (state.acIndex >= 0 && items[state.acIndex]) {
         // Select the focused item
         guessInput.value = items[state.acIndex].dataset.name;
