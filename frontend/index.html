@@ -8,8 +8,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <!-- Favicon — shield emoji as inline SVG -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+  <!-- Umami analytics — privacy-friendly, no cookies -->
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="04fbd8e5-b359-4711-a30a-a130289079f9"></script>
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json" />
+  <!-- Theme color — browser UI matches app dark theme -->
+  <meta name="theme-color" content="#0a0c10" />
+  <!-- Apple PWA meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Crestle" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <!-- Favicon -->
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
 </head>
 <body>
 
@@ -123,6 +134,20 @@
     </main>
 
   </div><!-- /#app -->
+
+  <!-- ── Footer ────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <p class="footer-text">
+      Found a bug or have a suggestion?
+      <a href="https://github.com/hgomezm92/crestle/issues" target="_blank" rel="noopener">Open an issue on GitHub</a>
+      <span class="footer-sep">·</span>
+      <a href="mailto:crestlegame@gmail.com">crestlegame@gmail.com</a>
+    </p>
+    <p class="footer-copy">
+      Crestle — Club data by <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a>.
+      All trademarks belong to their respective clubs.
+    </p>
+  </footer>
 
   <script src="game.js"></script>
 </body>

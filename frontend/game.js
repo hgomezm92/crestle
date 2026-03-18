@@ -611,6 +611,18 @@ document.addEventListener('click', e => {
    9. BOOT
    ════════════════════════════════════════════════════════════════ */
 
+// ── Service Worker registration (PWA) ───────────────────────────
+// The service worker enables "Add to Home Screen" on mobile and
+// caches static assets for faster subsequent loads.
+// It runs in the background and is separate from the page's JS.
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('[Crestle] Service worker registered'))
+      .catch(err => console.warn('[Crestle] Service worker failed:', err));
+  });
+}
+
 // Space or Enter on the result banner advances to the next round
 document.addEventListener('keydown', e => {
   if (!state.gameOver) return;
