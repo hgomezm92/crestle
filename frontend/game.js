@@ -167,6 +167,46 @@ const state = {
 
 
 /* ════════════════════════════════════════════════════════════════
+   2.5 STATS PERSISTENCE
+   localStorage saves stats between sessions.
+   All data stays in the user's browser — nothing is sent to the server.
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Loads saved stats from localStorage into state.stats.
+ * Called once at startup. If no saved data exists, stats stay at 0.
+ * Uses try/catch because localStorage can be blocked in some
+ * privacy-focused browsers or in private browsing mode.
+ */
+function loadStats() {
+  try {
+    const saved = localStorage.getItem(CONFIG.STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Only load valid numeric values — guards against corrupted data
+      state.stats.wins   = Number(parsed.wins)   || 0;
+      state.stats.streak = Number(parsed.streak) || 0;
+      state.stats.total  = Number(parsed.total)  || 0;
+    }
+  } catch (err) {
+    console.warn('[Crestdle] Could not load stats from localStorage:', err);
+  }
+}
+
+/**
+ * Saves current stats to localStorage.
+ * Called every time stats change (after each round ends).
+ */
+function saveStats() {
+  try {
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(state.stats));
+  } catch (err) {
+    console.warn('[Crestdle] Could not save stats to localStorage:', err);
+  }
+}
+
+
+/* ════════════════════════════════════════════════════════════════
    3. INITIALISATION
    ════════════════════════════════════════════════════════════════ */
 
@@ -195,6 +235,7 @@ async function init() {
     await sleep(400);
 
     hideLoadingScreen();
+    loadStats();    // restore saved stats before rendering
     startRound();
     renderStats();
 
@@ -384,6 +425,7 @@ function submitGuess() {
     state.stats.wins++;
     state.stats.streak++;
     state.stats.total++;
+    saveStats();
 
     $('crestImg').style.filter = 'blur(0px)';
     renderPips(true);
@@ -404,6 +446,7 @@ function submitGuess() {
       state.gameOver     = true;
       state.stats.streak = 0;
       state.stats.total++;
+      saveStats();
       $('crestImg').style.filter = 'blur(0px)';
       showResult(false);
     } else {
