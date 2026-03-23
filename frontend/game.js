@@ -57,7 +57,12 @@ const CONFIG = {
    * Before deploying to Netlify, change this to your Render URL:
    *   e.g. 'https://crestle.onrender.com'
    */
-  API_BASE: 'https://crestle-7r0f.onrender.com',
+  // Automatically detect environment — no manual changes needed
+  // when switching between local development and production
+  API_BASE: (window.location.hostname === 'localhost' ||
+             window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : 'https://crestdle-7r0f.onrender.com',
 
   MAX_ATTEMPTS: 6,
 
@@ -239,6 +244,11 @@ async function init() {
     startRound();
     renderStats();
 
+    // Show instructions modal on first visit only
+    if (!localStorage.getItem('crestdle_seen_instructions')) {
+      openModal();
+    }
+
   } catch (err) {
     console.error('[Crestdle] Failed to load teams:', err);
     setLoadingProgress(100, 'Connection error — is the server running?');
@@ -291,6 +301,8 @@ function startRound() {
   $('guessesList').innerHTML  = '';
   $('resultBanner').classList.remove('visible');
   $('inputArea').style.display = 'block';
+  const shareBtn = $('shareBtn');
+  if (shareBtn) shareBtn.style.display = 'none';
   $('guessInput').value        = '';
   $('guessBtn').disabled       = false;
   $('autocompleteList').classList.remove('open');
@@ -402,7 +414,19 @@ function submitGuess() {
   if (state.gameOver) return;
 
   const input = $('guessInput');
-  const raw   = input.value.trim();
+
+  // If there is exactly one suggestion in the dropdown, select it automatically
+  // This works for both Enter key and the arrow submit button
+  const items = acList.querySelectorAll('.autocomplete-item');
+  if (items.length === 1 && !input.value.trim()) {
+    input.value = items[0].dataset.name;
+    acList.classList.remove('open');
+  } else if (items.length === 1 && acList.classList.contains('open')) {
+    input.value = items[0].dataset.name;
+    acList.classList.remove('open');
+  }
+
+  const raw = input.value.trim();
   if (!raw) return;
 
   // Find the team in our local list (normalised comparison)
@@ -550,6 +574,73 @@ function showResult(won) {
   $('resultTeam').textContent    = state.current.name;
 
   $('resultBanner').classList.add('visible');
+
+  // Show share button
+  const shareBtn = $('shareBtn');
+  if (shareBtn) shareBtn.style.display = 'flex';
+}
+
+/**
+ * Generates a shareable text result in Wordle style and copies
+ * it to the clipboard.
+ *
+ * Each attempt is represented by an emoji:
+ *   🟩 correct guess
+ *   🟥 wrong guess
+ *   ⬛ skipped attempt
+ */
+function shareResult() {
+  const attempts = state.guesses.map(g => {
+    if (g === '') return '⬛';  // skipped
+    if (normalize(g) === normalize(state.current.name)) return '🟩';
+    return '🟥';
+  });
+
+  const attemptsStr = state.won
+    ? `${state.wrongCount + 1}/${CONFIG.MAX_ATTEMPTS}`
+    : `X/${CONFIG.MAX_ATTEMPTS}`;
+
+  const text = [
+    `Crestdle — ${attemptsStr}`,
+    attempts.join(''),
+    'crestdle.netlify.app',
+  ].join('\n');
+
+  /**
+   * Web Share API — opens the native OS share sheet (mobile/desktop Chrome).
+   * Shows WhatsApp, Twitter, Telegram, etc. directly.
+   * Falls back to clipboard copy if Web Share is not supported
+   * (e.g. Firefox desktop).
+   */
+  if (navigator.share) {
+    navigator.share({ text })
+      .catch(err => {
+        // User cancelled share — not an error worth logging
+        if (err.name !== 'AbortError') {
+          console.warn('[Crestdle] Share failed:', err);
+        }
+      });
+  } else {
+    // Clipboard fallback — show clear visual confirmation
+    const btn = $('shareBtn');
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        if (btn) {
+          const original = btn.innerHTML;
+          btn.innerHTML = '<span>✓ Copied!</span>';
+          btn.style.borderColor = 'var(--green)';
+          btn.style.color       = 'var(--green)';
+          btn.style.fontSize    = '14px';
+          setTimeout(() => {
+            btn.innerHTML      = original;
+            btn.style.borderColor = '';
+            btn.style.color       = '';
+            btn.style.fontSize    = '';
+          }, 2500);
+        }
+      })
+      .catch(() => prompt('Copy your result:', text));
+  }
 }
 
 /** Syncs the stats panel with current state. */
@@ -653,6 +744,24 @@ document.addEventListener('click', e => {
 /* ════════════════════════════════════════════════════════════════
    9. BOOT
    ════════════════════════════════════════════════════════════════ */
+
+// ── Instructions modal ───────────────────────────────────────────
+
+function openModal() {
+  $('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  // Mark instructions as seen so they don't auto-open again
+  localStorage.setItem('crestdle_seen_instructions', '1');
+  $('modalOverlay').classList.remove('open');
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
 
 // ── Service Worker registration (PWA) ───────────────────────────
 // The service worker enables "Add to Home Screen" on mobile and

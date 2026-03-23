@@ -3,27 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crestdle — Guess the Crest</title>
+  <title>Crestdle — Guess the Football Crest</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Guess the football club crest in 6 attempts. Progressive hints. Infinite mode. Free to play." />
+
+  <!-- Open Graph — controls how the link looks when shared on social media -->
+  <meta property="og:title"       content="Crestdle — Guess the Football Crest" />
+  <meta property="og:description" content="Guess the football club crest in 6 attempts. Progressive hints. Infinite mode." />
+  <meta property="og:image"       content="https://crestdle.netlify.app/icons/icon-512.png" />
+  <meta property="og:url"         content="https://crestdle.netlify.app" />
+  <meta property="og:type"        content="website" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:title"       content="Crestdle — Guess the Football Crest" />
+  <meta name="twitter:description" content="Guess the football club crest in 6 attempts." />
+  <meta name="twitter:image"       content="https://crestdle.netlify.app/icons/icon-512.png" />
+
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="style.css" />
+
   <!-- Umami analytics — privacy-friendly, no cookies -->
   <script defer src="https://cloud.umami.is/script.js" data-website-id="04fbd8e5-b359-4711-a30a-a130289079f9"></script>
+
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.json" />
-  <!-- Theme color — browser UI matches app dark theme -->
   <meta name="theme-color" content="#0a0c10" />
-  <!-- Apple PWA meta tags -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Crestdle" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <!-- Favicon -->
   <link rel="icon" href="icons/icon-192.png" type="image/png" />
 </head>
 <body>
+
+  <!-- ── Instructions modal ─────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2 class="modal-title">How to play</h2>
+
+      <div class="modal-section">
+        <p>Guess the <strong>football club</strong> from its crest in <strong>6 attempts</strong>.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-rule">
+          <span class="modal-icon">🛡️</span>
+          <span>The crest is shown <strong>blurred</strong>. It gets clearer with each wrong guess.</span>
+        </div>
+        <div class="modal-rule">
+          <span class="modal-icon">💡</span>
+          <span>A new <strong>hint</strong> is revealed after each wrong guess.</span>
+        </div>
+        <div class="modal-rule">
+          <span class="modal-icon">⏭️</span>
+          <span>Use <strong>Skip</strong> to pass — it costs one attempt.</span>
+        </div>
+        <div class="modal-rule">
+          <span class="modal-icon">♾️</span>
+          <span><strong>Infinite mode</strong> — a new crest after every round.</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <p class="modal-hints-title">Hints revealed in order:</p>
+        <div class="modal-hints">
+          <span>🌍 Country</span>
+          <span>🏆 League</span>
+          <span>🎨 Colours</span>
+          <span>🏟 Stadium</span>
+          <span>📍 City</span>
+        </div>
+      </div>
+
+      <button class="modal-play-btn" onclick="closeModal()">Let's play!</button>
+    </div>
+  </div>
 
   <!-- ── Loading screen ────────────────────────────────────────── -->
   <div id="loadingScreen">
@@ -32,7 +94,7 @@
     <div class="loading-text" id="loadingText">Loading teams...</div>
   </div>
 
-  <!-- ── Main app (hidden until data loads) ────────────────────── -->
+  <!-- ── Main app ───────────────────────────────────────────────── -->
   <div id="app" class="hidden">
 
     <header>
@@ -42,20 +104,23 @@
           <span class="logo-dot">·</span>
           <span class="logo-sub">Guess the Crest</span>
         </div>
-        <div class="stats-bar">
-          <div class="stat">
-            <span class="stat-value" id="statWins">0</span>
-            <span class="stat-label">Won</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat">
-            <span class="stat-value" id="statStreak">0</span>
-            <span class="stat-label">Streak</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat">
-            <span class="stat-value" id="statTotal">0</span>
-            <span class="stat-label">Played</span>
+        <div class="header-right">
+          <button class="how-to-btn" onclick="openModal()" title="How to play">?</button>
+          <div class="stats-bar">
+            <div class="stat">
+              <span class="stat-value" id="statWins">0</span>
+              <span class="stat-label">Won</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+              <span class="stat-value" id="statStreak">0</span>
+              <span class="stat-label">Streak</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+              <span class="stat-value" id="statTotal">0</span>
+              <span class="stat-label">Played</span>
+            </div>
           </div>
         </div>
       </div>
@@ -64,7 +129,7 @@
     <main>
       <div class="game-card">
 
-        <!-- Crest display -->
+        <!-- Crest -->
         <div class="crest-container">
           <div class="crest-wrap" id="crestWrap">
             <img id="crestImg" class="crest-img" src="" alt="Football club crest" />
@@ -72,7 +137,6 @@
               <span class="placeholder-icon">⚔</span>
               <span class="placeholder-text">No image</span>
             </div>
-            <!-- Corner decorations -->
             <div class="corner corner-tl"></div>
             <div class="corner corner-tr"></div>
             <div class="corner corner-bl"></div>
@@ -93,21 +157,27 @@
           </div>
         </div>
 
-        <!-- Hints revealed after each wrong guess -->
+        <!-- Hints -->
         <div class="hints-list" id="hintsList"></div>
 
-        <!-- Wrong guesses history -->
+        <!-- Wrong guesses -->
         <div class="guesses-list" id="guessesList"></div>
 
         <!-- Result banner -->
         <div class="result-banner" id="resultBanner">
           <div class="result-verdict" id="resultVerdict"></div>
-          <div class="result-meta" id="resultMeta"></div>
-          <div class="result-team" id="resultTeam"></div>
-          <button class="next-btn" id="nextBtn" onclick="nextRound()">
-            <span>Next Crest</span>
-            <span class="next-arrow">→</span>
-          </button>
+          <div class="result-meta"    id="resultMeta"></div>
+          <div class="result-team"    id="resultTeam"></div>
+          <div class="result-actions">
+            <button class="share-btn" id="shareBtn" onclick="shareResult()" style="display:none">
+              <span>Share</span>
+              <span>↑</span>
+            </button>
+            <button class="next-btn" id="nextBtn" onclick="nextRound()">
+              <span>Next Crest</span>
+              <span class="next-arrow">→</span>
+            </button>
+          </div>
         </div>
 
         <!-- Input area -->
@@ -134,19 +204,19 @@
       </div><!-- /.game-card -->
     </main>
 
-  </div><!-- /#app -->
+    <!-- Footer -->
+    <footer class="site-footer">
+      <p class="footer-text">
+        Found a bug or have a suggestion?
+        <a href="https://github.com/hgomezm92/crestdle/issues" target="_blank" rel="noopener">Open an issue on GitHub</a>
+      </p>
+      <p class="footer-copy">
+        Crestdle — Club data by <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a>.
+        All trademarks belong to their respective clubs.
+      </p>
+    </footer>
 
-  <!-- ── Footer ────────────────────────────────────────────────── -->
-  <footer class="site-footer">
-    <p class="footer-text">
-      Found a bug or have a suggestion?
-      <a href="https://github.com/hgomezm92/crestdle/issues" target="_blank" rel="noopener">Open an issue on GitHub</a>
-    </p>
-    <p class="footer-copy">
-      Crestdle — Club data by <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a>.
-      All trademarks belong to their respective clubs.
-    </p>
-  </footer>
+  </div><!-- /#app -->
 
   <script src="game.js"></script>
 </body>
